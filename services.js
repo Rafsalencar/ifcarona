@@ -11,6 +11,15 @@ const fmtDate = iso => {
     return y && m && d ? `${d}/${m}/${y}` : iso;
 };
 
+const formatPhone = value => {
+    const d = String(value ?? '').replace(/\D/g, '').slice(0, 11);
+
+    if (d.length <= 2) return d ? `(${d}` : '';
+    if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+    if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+};
+
 const Validate = (() => {
     const EDU = /^[^\s@]+@([a-z0-9-]+\.)+edu\.br$/i;
     const PLATE = /^[A-Z]{3}-?\d[A-Z0-9]\d{2}$/;

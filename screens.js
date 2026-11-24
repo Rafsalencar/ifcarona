@@ -90,7 +90,7 @@ const userCard = user => {
 
     const details = [
         `Solicitado em ${user.criadoEm}`,
-        user.telefone && `Telefone: ${user.telefone}`,
+        user.telefone && `Telefone: ${formatPhone(user.telefone)}`,
         vehicle && `Veículo: ${vehicle}`,
         user.comprovante && `Comprovante: ${user.comprovante.nome}`
     ].filter(Boolean);
@@ -482,12 +482,12 @@ const Screens = {
         const isDriver = user.perfil === 'm';
         const vehicle = user.veiculo || {};
 
-        const field = (name, label, value, type = 'text') => `
+        const field = (name, label, value, type = 'text', attrs = '') => `
             <div>
                 <label class="lb" for="perfil-${name}">${label}</label>
                 <input class="in" ${bind('perfil', name)} type="${type}"
                     value="${esc(editing ? draftValue('perfil', name, value) : value)}"
-                    ${editing ? '' : 'disabled'}>
+                    ${attrs} ${editing ? '' : 'disabled'}>
             </div>`;
 
         const stats = {
@@ -526,7 +526,7 @@ const Screens = {
                     <div class="profile-fields">
                         ${field('nome', 'Nome completo', user.nome)}
                         ${field('email', 'E-mail institucional', user.email, 'email')}
-                        ${field('telefone', 'Telefone', user.telefone, 'tel')}
+                        ${field('telefone', 'Telefone', formatPhone(user.telefone), 'tel', 'inputmode="tel" autocomplete="tel" maxlength="15" placeholder="(82) 99999-0000"')}
                     </div>
                 </div>
 

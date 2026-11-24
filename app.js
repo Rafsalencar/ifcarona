@@ -436,6 +436,8 @@ document.addEventListener('input', event => {
         return;
     }
 
+    if (target.name === 'telefone') target.value = formatPhone(target.value);
+
     const scope = target.dataset?.draft;
 
     if (scope) {
