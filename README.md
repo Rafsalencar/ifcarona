@@ -1,10 +1,4 @@
-# IFCarona (versão demonstrativa)
 
-Plataforma de caronas para a comunidade acadêmica. Esta versão é 100% frontend: sem PHP, sem MySQL e sem APIs externas. Todos os dados ficam no `localStorage` do navegador.
-
-## Como executar
-
-Abra o `index.html` no navegador ou publique a pasta em qualquer hospedagem estática (GitHub Pages, por exemplo). Não há etapa de build.
 
 ## Contas de demonstração
 
