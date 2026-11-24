@@ -327,9 +327,15 @@ textarea {
   color: var(--btx);
 }
 
+.tag.r {
+  background: var(--rl);
+  color: var(--r);
+}
+
 .av {
   width: 44px;
   height: 44px;
+  overflow: hidden;
   border-radius: 50%;
   background: var(--gt);
   color: var(--gtx);
@@ -339,6 +345,13 @@ textarea {
   font-weight: 700;
   font-size: 17px;
   flex: none;
+}
+
+.av img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .hero {
@@ -441,158 +454,129 @@ a {
   font-weight: 700;
 }
 
-
-
-
 .profile-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 20px;
 }
 
 .profile-photo-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.profile-identification {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    min-width: 0;
-}
-
-.profile-identification strong {
-    font-size: 18px;
-}
-
-.profile-identification span {
-    overflow-wrap: anywhere;
-}
-
-.profile-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 18px;
-}
-
-.profile-fields > div {
-    min-width: 0;
-}
-
-.profile-fields .lb {
-    display: block;
-    margin-bottom: 7px;
-}
-
-.profile-fields .in {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.profile-fields .in:disabled {
-    opacity: 1;
-    color: var(--ink);
-    background: var(--bg);
-}
-
-.profile-photo-button {
-    cursor: pointer;
-    font-size: 12px;
-}
-
-@media (max-width: 600px) {
-    .profile-fields {
-        grid-template-columns: 1fr;
-    }
-
-    .profile-header {
-        gap: 14px;
-    }
-}
-
-
-
-
-.profile-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 18px;
-}
-
-.profile-photo-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    flex: 0 0 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 100px;
 }
 
 .profile-avatar {
-    width: 88px !important;
-    height: 88px !important;
-    min-width: 88px;
-    border-radius: 50%;
-    overflow: hidden;
-    aspect-ratio: 1 / 1;
-    flex-shrink: 0;
-    border: 3px solid var(--line);
-    background: var(--in);
+  width: 88px;
+  height: 88px;
+  min-width: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  border: 3px solid var(--line);
+  background: var(--in);
 }
 
 .profile-avatar img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    border-radius: 50%;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
 }
 
 .profile-avatar span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.profile-photo-button {
+  cursor: pointer;
 }
 
 .profile-photo-area .gh,
 .profile-photo-area button,
 .profile-photo-button {
-    font-size: 11px;
-    text-align: center;
-    white-space: nowrap;
-    padding: 6px 8px;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+  padding: 6px 8px;
 }
 
 .profile-identification {
-    flex: 1;
-    min-width: 0;
-    padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+  padding-top: 8px;
 }
 
 .profile-identification strong {
-    font-size: 17px;
+  font-size: 17px;
+}
+
+.profile-identification span {
+  overflow-wrap: anywhere;
+}
+
+.profile-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.profile-fields > div {
+  min-width: 0;
+}
+
+.profile-fields .lb {
+  display: block;
+  margin-bottom: 7px;
+}
+
+.profile-fields .in {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.profile-fields .in:disabled {
+  opacity: 1;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+@media (max-width: 600px) {
+  .profile-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-header {
+    gap: 14px;
+  }
 }
 
 @media (max-width: 480px) {
-    .profile-header {
-        gap: 12px;
-    }
+  .profile-header {
+    gap: 12px;
+  }
 
-    .profile-photo-area {
-        flex-basis: 90px;
-    }
+  .profile-photo-area {
+    flex-basis: 90px;
+  }
 
-    .profile-avatar {
-        width: 80px !important;
-        height: 80px !important;
-        min-width: 80px;
-    }
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+  }
 }
