@@ -48,7 +48,7 @@ const driverRideCard = ride => {
             <div>
                 <strong>${esc(ride.origem)} → ${esc(ride.destino)}</strong>
                 <div style="font-size:13px;color:var(--mut);margin:4px 0 8px">
-                    ${esc(ride.data)} · ${esc(ride.horario)}
+                    ${esc(fmtDate(ride.data))} · ${esc(ride.horario)}
                 </div>
                 <span class="tag ${free < 2 ? 'w' : ''}">${free ? vg(free) : 'Lotada'}</span>
             </div>
@@ -325,7 +325,7 @@ const Screens = {
                     <div style="display:flex;gap:24px;flex-wrap:wrap">
                         <div>
                             <span class="lb">Data</span>
-                            <strong>${esc(ride.data)}</strong>
+                            <strong>${esc(fmtDate(ride.data))}</strong>
                         </div>
                         <div>
                             <span class="lb">Saída</span>
@@ -389,11 +389,11 @@ const Screens = {
                 <div style="display:flex;gap:12px">
                     <div style="flex:1">
                         <label class="lb" for="ride-data">Data</label>
-                        <input class="in" ${bind('ride', 'data')} value="${esc(draftValue('ride', 'data'))}" placeholder="DD/MM/AAAA" inputmode="numeric">
+                        <input class="in" type="date" min="${isoDate()}" ${bind('ride', 'data')} value="${esc(draftValue('ride', 'data'))}">
                     </div>
                     <div style="flex:1">
                         <label class="lb" for="ride-horario">Horário</label>
-                        <input class="in" ${bind('ride', 'horario')} value="${esc(draftValue('ride', 'horario'))}" placeholder="HH:MM" inputmode="numeric">
+                        <input class="in" type="time" ${bind('ride', 'horario')} value="${esc(draftValue('ride', 'horario'))}">
                     </div>
                 </div>
 

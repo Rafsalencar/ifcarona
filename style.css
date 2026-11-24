@@ -580,3 +580,10 @@ a {
     min-width: 80px;
   }
 }
+
+.in[type="date"],
+.in[type="time"] {
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}

@@ -4,6 +4,8 @@ const Demo = (() => {
     const dateOffset = days =>
         new Date(Date.now() + days * DAY_MS).toLocaleDateString('pt-BR');
 
+    const rideDate = days => isoDate(new Date(Date.now() + days * DAY_MS));
+
     const vehicle = (modelo, cor, placa, vagas) => ({ modelo, cor, placa, vagas });
 
     const person = (id, nome, email, perfil, status, extra = {}) => ({
@@ -58,7 +60,7 @@ const Demo = (() => {
         driverId,
         origem: 'Bairro Centro',
         destino: 'Campus Arapiraca',
-        data: dateOffset(0),
+        data: rideDate(0),
         horario,
         vagas,
         observacoes: '',
@@ -101,8 +103,20 @@ const Demo = (() => {
         DB.write('seeded', true);
     };
 
+    const migrate = () => {
+        const rides = Tables.rides.all();
+        if (!rides.some(r => String(r.data).includes('/'))) return;
+
+        Tables.rides.replaceAll(rides.map(r => {
+            if (!String(r.data).includes('/')) return r;
+            const [d, m, y] = r.data.split('/');
+            return { ...r, data: `${y}-${m}-${d}` };
+        }));
+    };
+
     const init = () => {
         if (!DB.read('seeded', false)) populate();
+        else migrate();
     };
 
     const reset = () => {

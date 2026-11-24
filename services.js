@@ -3,19 +3,27 @@ const fail = message => ({ ok: false, message });
 
 const today = () => new Date().toLocaleDateString('pt-BR');
 
+const isoDate = (d = new Date()) =>
+    new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+const fmtDate = iso => {
+    const [y, m, d] = String(iso).split('-');
+    return y && m && d ? `${d}/${m}/${y}` : iso;
+};
+
 const Validate = (() => {
     const EDU = /^[^\s@]+@([a-z0-9-]+\.)+edu\.br$/i;
     const PLATE = /^[A-Z]{3}-?\d[A-Z0-9]\d{2}$/;
-    const DATE = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
     const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
     const date = value => {
         const match = DATE.exec(value);
         if (!match) return false;
 
-        const day = Number(match[1]);
+        const year = Number(match[1]);
         const month = Number(match[2]);
-        const year = Number(match[3]);
+        const day = Number(match[3]);
         const parsed = new Date(year, month - 1, day);
 
         return parsed.getFullYear() === year
@@ -173,8 +181,8 @@ const Rides = {
     validate(ride) {
         if (!ride.origem) return 'Informe a origem da carona.';
         if (!ride.destino) return 'Informe o destino da carona.';
-        if (!Validate.date(ride.data)) return 'Informe a data no formato DD/MM/AAAA.';
-        if (!Validate.time(ride.horario)) return 'Informe o horário no formato HH:MM.';
+        if (!Validate.date(ride.data)) return 'Escolha a data da carona.';
+        if (!Validate.time(ride.horario)) return 'Escolha o horário da carona.';
         if (!Validate.seats(ride.vagas, LIMITS.maxRideSeats)) return 'Informe de 1 a 6 vagas.';
         return '';
     },
