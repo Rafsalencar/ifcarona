@@ -25,6 +25,18 @@ const esc = s =>
         '"': '&quot;'
     }[c]));
 
+function avatar(user, size = 64) {
+    const foto = user?.foto;
+
+    return `
+        <div class="profile-avatar" style="width:${size}px;height:${size}px">
+            ${foto
+                ? `<img src="${foto}" alt="Foto de perfil">`
+                : `<span>${esc((user?.n || 'U').charAt(0).toUpperCase())}</span>`
+            }
+        </div>
+    `;
+}  
 
 const EDU = /^[^\s@]+@([a-z0-9-]+\.)+edu\.br$/i;
 
@@ -91,6 +103,8 @@ const S = {
     doc: '',
     file: null,
     tipo: 'p',
+    profileEdit: false,
+
 
     rides: [
         { id: 'A', t: '07:30', r: '4,0', v: 3 },
@@ -543,51 +557,132 @@ const SC = {
         return `${head('Caronas')}<div class="scr">${b}</div>`;
     },
 
-    perfil: () => `${head('Perfil')}
-    <div class="scr">
-        <div class="c" style="display:flex;gap:12px;align-items:center">
-            <span class="av">${ROLE[S.role][0]}</span>
-            <div>
-                <strong>${esc(S.user.n)}</strong>
-                <div style="font-size:13px;color:var(--mut);margin-top:2px">${esc(S.user.e)}</div>
-                <div style="margin-top:6px">
-                    <span class="tag ${S.role === 'a' ? 'b' : ''}">${ROLE[S.role]}</span>
-                </div>
-            </div>
+perfil: () => {
+    const u = S.user;
+    const editando = S.profileEdit;
+
+    const campo = (label, id, valor, tipo = 'text') => `
+        <div>
+            <label class="lb" for="${id}">${label}</label>
+            <input
+                class="in"
+                id="${id}"
+                type="${tipo}"
+                value="${esc(valor || '')}"
+                ${editando ? '' : 'disabled'}
+            >
         </div>
+    `;
 
-        <div class="c" style="display:flex;flex-direction:column;gap:14px">
-            <div>
-                <span class="lb">Instituição</span>
-                <strong>${esc(S.user.e.split('@')[1])}</strong>
+    return `${head('Meu perfil')}
+    <div class="scr">
+
+        <div class="c profile-header">
+            <div class="profile-photo-area">
+                ${avatar(u, 88)}
+
+                ${editando ? `
+                    <label class="gh profile-photo-button" for="fotoPerfil">
+                        Alterar foto
+                    </label>
+                    <input
+                        type="file"
+                        id="fotoPerfil"
+                        accept="image/png,image/jpeg,image/webp"
+                        hidden
+                    >
+                    ${u.foto ? `
+                        <button class="gh d" data-act="removerFoto">
+                            Remover foto
+                        </button>
+                    ` : ''}
+                ` : ''}
             </div>
 
-            <div>
-                <span class="lb">Situação do cadastro</span>
-                <span class="tag">Verificado</span>
-            </div>
-
-            <div style="display:flex;gap:12px">
-                ${S.role === 'p'
-                    ? stat('Solicitadas', S.booked.length) + stat('Com vagas', S.rides.filter(r => r.v).length)
-                    : S.role === 'm'
-                        ? stat('Publicadas', S.mine.length) + stat('Vagas ofertadas', S.mine.reduce((a, m) => a + m.v, 0))
-                        : stat('Pendentes', reqs().length) + stat('Denúncias', S.reps.length)}
+            <div class="profile-identification">
+                <strong>${esc(u.n)}</strong>
+                <span>${esc(u.e)}</span>
+                <span class="tag">${ROLE[S.role]}</span>
             </div>
         </div>
 
         <div class="c">
-            <span class="lb">Regras de uso</span>
-            <p class="mut">Uso restrito a maiores de 18 anos. A divisão do combustível é simbólica, sem fins lucrativos, para não configurar transporte remunerado.</p>
+            <h3>Informações pessoais</h3>
+
+            <div class="profile-fields">
+                ${campo('Nome completo', 'perfilNome', u.n)}
+                ${campo('E-mail institucional', 'perfilEmail', u.e, 'email')}
+                ${campo('Telefone', 'perfilTelefone', u.telefone)}
+            </div>
         </div>
+
+        ${S.role === 'm' ? `
+            <div class="c">
+                <h3>Informações do veículo</h3>
+
+                <div class="profile-fields">
+                    ${campo('Modelo do veículo', 'veiculoModelo', u.veiculoModelo)}
+                    ${campo('Cor', 'veiculoCor', u.veiculoCor)}
+                    ${campo('Placa', 'veiculoPlaca', u.veiculoPlaca)}
+                    ${campo('Quantidade de vagas', 'veiculoVagas', u.veiculoVagas || '3', 'number')}
+                </div>
+            </div>
+        ` : ''}
+
+        <div class="c">
+            <span class="lb">Situação do cadastro</span>
+            <span class="tag">${u.st === 'aprovado' ? 'Verificado' : esc(u.st)}</span>
+        </div>
+
+        ${u.temComprovante ? `
+            <div class="c">
+                <a
+                    class="gh"
+                    href="api/comprovante.php"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    Visualizar comprovante de vínculo
+                </a>
+            </div>
+        ` : ''}
+
+        <div class="c">
+            <div style="display:flex;gap:12px">
+                ${S.role === 'p'
+                    ? stat('Solicitadas', S.booked.length) +
+                      stat('Com vagas', S.rides.filter(r => r.v).length)
+                    : stat('Publicadas', S.mine.length) +
+                      stat('Vagas ofertadas', S.mine.reduce((a, m) => a + m.v, 0))}
+            </div>
+        </div>
+
+        ${editando ? `
+            <button class="pr" data-act="salvarPerfil">
+                Salvar alterações
+            </button>
+
+            <button class="gh" data-act="cancelarEdicao">
+                Cancelar
+            </button>
+        ` : `
+            <button class="pr" data-act="editarPerfil">
+                Editar perfil
+            </button>
+        `}
 
         <div class="c">
             <span class="lb">Dicas de segurança</span>
-            <p class="mut">Confira a nota e o perfil verificado do motorista, combine o ponto de encontro dentro do campus e denuncie qualquer conduta inadequada.</p>
+            <p class="mut">
+                Confira a nota e o perfil verificado do motorista,
+                combine o ponto de encontro dentro do campus e denuncie
+                qualquer conduta inadequada.
+            </p>
         </div>
 
         <button class="gh" data-act="sair">Sair da conta</button>
-    </div>`,
+    </div>`;
+},
 
     admin: () => `<div class="h" style="align-items:flex-start">
         <div>
@@ -721,6 +816,12 @@ document.addEventListener('click', async e => {
 
     if (a === 'cad') {
         e.preventDefault();
+
+        S.screen = 'cadastro';
+     S.err = '';
+
+        render();
+        return;
     }
 
     if (a === 'role') {
@@ -732,68 +833,121 @@ document.addEventListener('click', async e => {
         render();
     }
 
-    else if (a === 'login') {
-        S.em = val('em').trim();
+    else if (a === 'tipo') {
+    S.tipo = d.v;
+    S.err = '';
 
-        const pw = val('pw');
-        S.pw = pw;
+    render();
+}
 
-        const bad = t => {
-            S.err = t;
-            render();
-        };
+else if (a === 'voltarLogin') {
+    S.screen = 'login';
+    S.err = '';
 
-        if (!EDU.test(S.em)) {
-            return bad('Use seu e-mail institucional (terminado em .edu.br).');
-        }
+    render();
+    return;
+}
 
-        const u = S.users.find(
-            x => x.e.toLowerCase() === S.em.toLowerCase()
+    
+else if (a === 'login') {
+    S.em = val('em').trim();
+
+    const pw = val('pw');
+    S.pw = pw;
+
+    const bad = t => {
+        S.err = t;
+        render();
+    };
+
+    if (!EDU.test(S.em)) {
+        return bad(
+            'Use seu e-mail institucional terminado em .edu.br.'
         );
+    }
 
-        if (!u || u.pw !== pw) {
-            return bad('E-mail ou senha incorretos.');
+    try {
+        const resposta = await fetch('api/login.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                email: S.em,
+                senha: pw
+            })
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok || !dados.sucesso) {
+            return bad(
+                dados.mensagem || 'Não foi possível realizar o login.'
+            );
         }
 
-        if (u.st === 'pendente') {
-            return bad('Seu cadastro ainda está em análise pelo administrador.');
-        }
+        const u = dados.usuario;
 
-        if (u.st === 'rejeitado') {
-            return bad('Seu cadastro não foi aprovado.');
-        }
-
-        if (u.r !== S.role) {
+        if (u.perfil !== S.role) {
             return bad(
                 'Este e-mail está cadastrado como ' +
-                ROLE[u.r] +
+                ROLE[u.perfil] +
                 '. Selecione esse perfil.'
             );
         }
 
-        S.user = u;
+        if (u.status === 'pendente') {
+            return bad(
+                'Seu cadastro ainda está em análise pelo administrador.'
+            );
+        }
+
+        if (u.status === 'rejeitado') {
+            return bad('Seu cadastro não foi aprovado.');
+        }
+
+        if (u.status !== 'aprovado') {
+            return bad('Não foi possível validar seu cadastro.');
+        }
+
+       
+    S.user = {
+        id: u.id,
+        n: u.nome,
+        e: u.email,
+        r: u.perfil,
+        st: u.status,
+
+        telefone: u.telefone || '',
+
+        veiculoModelo: u.veiculo_modelo || '',
+        veiculoCor: u.veiculo_cor || '',
+        veiculoPlaca: u.veiculo_placa || '',
+        veiculoVagas: u.veiculo_vagas || '',
+
+        foto: u.tem_foto
+            ? 'api/foto_perfil.php?v=' + Date.now()
+            : '',
+
+        temComprovante: u.tem_comprovante
+    };
+
+
         S.pw = '';
+        S.err = '';
 
-        go(HOME[u.r]);
+        go(HOME[u.perfil]);
+
+    } catch (erro) {
+        console.error('Erro no login:', erro);
+
+        bad(
+            'Não foi possível conectar ao servidor. Tente novamente.'
+        );
     }
+}
 
-    else if (a === 'cad') {
-        go('cadastro');
-    }
-
-    else if (a === 'voltarLogin') {
-        go('login');
-    }
-
-    else if (a === 'tipo') {
-        S.cn = val('cn');
-        S.ce = val('ce');
-        S.cpw = val('cp');
-
-        S.tipo = d.v;
-
-        render();
-    }
 
     
 else if (a === 'enviarCad') {
@@ -837,8 +991,9 @@ else if (a === 'enviarCad') {
     try {
         const resposta = await fetch('api/cadastro.php', {
             method: 'POST',
+            credentials: 'same-origin',
             body: dados
-        });
+});
 
         const resultado = await resposta.json();
 
@@ -1002,6 +1157,140 @@ else if (a === 'enviarCad') {
         render();
     }
 
+else if (a === 'editarPerfil') {
+    S.profileEdit = true;
+    render();
+}
+
+else if (a === 'cancelarEdicao') {
+    S.profileEdit = false;
+    render();
+}
+
+
+
+
+else if (a === 'salvarPerfil') {
+    const nome = val('perfilNome').trim();
+    const email = val('perfilEmail').trim();
+    const telefone = val('perfilTelefone').trim();
+
+    const motorista = S.role === 'm';
+
+    const veiculoModelo = motorista
+        ? val('veiculoModelo').trim()
+        : '';
+
+    const veiculoCor = motorista
+        ? val('veiculoCor').trim()
+        : '';
+
+    const veiculoPlaca = motorista
+        ? val('veiculoPlaca').trim().toUpperCase()
+        : '';
+
+    const veiculoVagas = motorista
+        ? val('veiculoVagas')
+        : null;
+
+    const bad = mensagem => {
+        S.err = mensagem;
+        render();
+    };
+
+    if (!nome) {
+        return bad('Informe seu nome completo.');
+    }
+
+    if (!EDU.test(email)) {
+        return bad('Informe um e-mail institucional válido.');
+    }
+
+    try {
+        const resposta = await fetch('api/atualizar_perfil.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nome,
+                email,
+                telefone,
+                veiculoModelo,
+                veiculoCor,
+                veiculoPlaca,
+                veiculoVagas
+            })
+        });
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok || !resultado.sucesso) {
+            return bad(
+                resultado.mensagem || 'Não foi possível atualizar o perfil.'
+            );
+        }
+
+        // Atualiza os dados pessoais.
+        S.user.n = nome;
+        S.user.e = email;
+        S.user.telefone = telefone;
+
+        // Atualiza os dados do veículo.
+        if (motorista) {
+            S.user.veiculoModelo = veiculoModelo;
+            S.user.veiculoCor = veiculoCor;
+            S.user.veiculoPlaca = veiculoPlaca;
+            S.user.veiculoVagas = veiculoVagas;
+        }
+
+        S.profileEdit = false;
+        S.err = '';
+
+        say('Perfil atualizado com sucesso!');
+        render();
+
+    } catch (erro) {
+        console.error('Erro ao atualizar perfil:', erro);
+        bad('Não foi possível conectar ao servidor.');
+    }
+}
+
+
+
+
+
+else if (a === 'removerFoto') {
+    const dados = new FormData();
+    dados.append('acao', 'remover');
+
+    fetch('api/foto_perfil.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: dados
+    })
+    .then(async resposta => {
+        const resultado = await resposta.json();
+
+        if (!resposta.ok || !resultado.sucesso) {
+            throw new Error(
+                resultado.mensagem || 'Não foi possível remover a foto.'
+            );
+        }
+
+        S.user.foto = '';
+
+        say('Foto removida com sucesso.');
+        render();
+    })
+    .catch(erro => {
+        console.error('Erro ao remover foto:', erro);
+        say(erro.message || 'Não foi possível conectar ao servidor.');
+    });
+}
+
+
     else if (a === 'adm') {
         S.adm = d.v;
         render();
@@ -1050,14 +1339,68 @@ document.addEventListener('input', e => {
 
 
 document.addEventListener('change', e => {
-     if (e.target.id === 'cd') {
+
+
+    if (e.target.id === 'cd') {
         const arquivo = e.target.files[0];
 
         S.file = arquivo || null;
         S.doc = arquivo ? arquivo.name : '';
 
-        render();
     }
+
+
+    
+    if (e.target.id === 'fotoPerfil') {
+        const arquivo = e.target.files[0];
+
+        if (!arquivo) return;
+
+        const formatos = [
+            'image/jpeg',
+            'image/png',
+            'image/webp'
+        ];
+
+        if (!formatos.includes(arquivo.type)) {
+            return say('Use uma imagem JPG, PNG ou WEBP.');
+        }
+
+        if (arquivo.size > 500 * 1024) {
+            return say('A imagem deve ter no máximo 500 KB.');
+        }
+
+        const dados = new FormData();
+
+        dados.append('acao', 'enviar');
+        dados.append('foto', arquivo);
+
+        fetch('api/foto_perfil.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: dados
+        })
+        .then(async resposta => {
+            const resultado = await resposta.json();
+
+            if (!resposta.ok || !resultado.sucesso) {
+                throw new Error(
+                    resultado.mensagem || 'Não foi possível atualizar a foto.'
+                );
+            }
+
+            S.user.foto = 'api/foto_perfil.php?v=' + Date.now();
+
+            say('Foto de perfil atualizada.');
+            render();
+        })
+    .catch(erro => {
+        console.error('Erro ao enviar foto:', erro);
+        say(erro.message || 'Não foi possível conectar ao servidor.');
+    });
+}
+
+
 });
 
 
